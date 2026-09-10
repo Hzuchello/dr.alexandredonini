@@ -47,10 +47,26 @@ const OJAS_CONFIG = {
     mensagensEl.scrollTop = mensagensEl.scrollHeight;
   }
 
+  function escaparHtml(texto) {
+    const div = document.createElement("div");
+    div.textContent = texto;
+    return div.innerHTML;
+  }
+
+  function formatarTextoBot(texto) {
+    let seguro = escaparHtml(texto);
+    seguro = seguro.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    seguro = seguro.replace(/__(.+?)__/g, "<strong>$1</strong>");
+    seguro = seguro.replace(/\*(.+?)\*/g, "<em>$1</em>");
+    seguro = seguro.replace(/(?<!\w)_(.+?)_(?!\w)/g, "<em>$1</em>");
+    seguro = seguro.replace(/\n/g, "<br>");
+    return seguro;
+  }
+
   function falarBot(texto) {
     const bolha = document.createElement("div");
     bolha.className = "bolha bot";
-    bolha.textContent = texto;
+    bolha.innerHTML = formatarTextoBot(texto);
     mensagensEl.appendChild(bolha);
     rolarParaFinal();
     return bolha;
@@ -94,7 +110,10 @@ const OJAS_CONFIG = {
     try {
       const resposta = await fetch(OJAS_CONFIG.webhookUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
         body: JSON.stringify({ chatInput: texto, sessionId }),
       });
 
