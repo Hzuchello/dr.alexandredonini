@@ -1,19 +1,24 @@
 /* =========================================================
-   Ôjas Bot — triagem e agendamento
+   Ôjas Bot — chat livre conectado ao Agente de IA no n8n
    Site: Dr. Alexandre Donnini (Psicólogo Clínico)
    ---------------------------------------------------------
-   Como conectar ao n8n mais adiante:
-   1. Publique um workflow no n8n com um nó "Webhook" (POST).
-   2. Copie a URL do webhook e preencha OJAS_CONFIG.webhookUrl abaixo.
-   3. Pronto — a cada triagem concluída, o bot envia um POST em
-      JSON para essa URL, além de continuar oferecendo o
-      atalho para o WhatsApp como confirmação para o cliente.
-   Enquanto webhookUrl estiver vazio, o bot funciona 100% no
-   navegador e conduz o cliente até um link pronto do WhatsApp.
+   O node "Chat Trigger" do n8n espera POST com:
+     { "chatInput": "texto do usuário", "sessionId": "..." }
+   e responde com:
+     { "output": "texto da resposta" }
+
+   IMPORTANTE (checklist no n8n):
+   - Workflow precisa estar "Active"
+   - Chat Trigger > "Make Chat Publicly Available": ligado
+   - Chat Trigger > "Allowed Origins (CORS)": inclua o domínio
+     onde este site estiver hospedado (ou "*" em teste)
+   - Em teste local com ngrok, sirva o site por um servidor
+     (ex.: "python -m http.server") em vez de abrir o arquivo
+     direto — abrir como file:// pode ser bloqueado pelo CORS.
    ========================================================= */
 
 const OJAS_CONFIG = {
-  webhookUrl: "https://overfunctioning-undefensibly-johnette.ngrok-free.dev/webhook/1d08054d-8c65-44d8-94ea-2f199427137a/chat", // ex: "https://seu-n8n.dominio.com/webhook/ojas-bot"
+  webhookUrl: "https://overfunctioning-undefensibly-johnette.ngrok-free.dev/webhook/1d08054d-8c65-44d8-94ea-2f199427137a/chat",
   whatsappNumero: "5541991151535", // Dr. Alexandre Donnini
   nomeAnfitriao: "Dr. Alexandre Donnini",
 };
@@ -23,15 +28,20 @@ const OJAS_CONFIG = {
   if (!app) return;
 
   const mensagensEl = app.querySelector("[data-ojas-mensagens]");
-  const opcoesEl = app.querySelector("[data-ojas-opcoes]");
   const formEl = app.querySelector("[data-ojas-form]");
   const inputEl = app.querySelector("[data-ojas-input]");
-  const resumoEl = app.querySelector("[data-ojas-resumo]");
+  const botaoEl = formEl.querySelector("button");
 
-  const respostas = {};
-  let etapaAtual = 0;
-  let aguardandoTexto = false;
-  let textoOpcional = false;
+  function obterSessionId() {
+    let id = localStorage.getItem("ojas-session-id");
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : "sess-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+      localStorage.setItem("ojas-session-id", id);
+    }
+    return id;
+  }
+
+  const sessionId = obterSessionId();
 
   function rolarParaFinal() {
     mensagensEl.scrollTop = mensagensEl.scrollHeight;
@@ -43,6 +53,7 @@ const OJAS_CONFIG = {
     bolha.textContent = texto;
     mensagensEl.appendChild(bolha);
     rolarParaFinal();
+    return bolha;
   }
 
   function falarUsuario(texto) {
@@ -53,170 +64,72 @@ const OJAS_CONFIG = {
     rolarParaFinal();
   }
 
-  function limparOpcoes() {
-    opcoesEl.innerHTML = "";
+  function mostrarDigitando() {
+    const bolha = document.createElement("div");
+    bolha.className = "bolha bot";
+    bolha.dataset.digitando = "true";
+    bolha.textContent = "digitando...";
+    mensagensEl.appendChild(bolha);
+    rolarParaFinal();
+    return bolha;
   }
 
-  function mostrarOpcoes(lista, aoEscolher) {
-    limparOpcoes();
-    lista.forEach((opcao) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "opcao-btn";
-      btn.textContent = opcao;
-      btn.addEventListener("click", () => {
-        limparOpcoes();
-        falarUsuario(opcao);
-        aoEscolher(opcao);
-      });
-      opcoesEl.appendChild(btn);
-    });
+  function travarEntrada(travar) {
+    inputEl.disabled = travar;
+    botaoEl.disabled = travar;
   }
 
-  function habilitarTexto(placeholder, opcional) {
-    aguardandoTexto = true;
-    textoOpcional = !!opcional;
-    inputEl.placeholder = placeholder;
-    inputEl.disabled = false;
-    inputEl.value = "";
-    inputEl.focus();
-  }
+  async function enviarMensagem(texto) {
+    falarUsuario(texto);
+    travarEntrada(true);
+    const bolhaDigitando = mostrarDigitando();
 
-  function desabilitarTexto() {
-    aguardandoTexto = false;
-    inputEl.disabled = true;
-    inputEl.placeholder = "Escolha uma das opções acima";
-  }
-
-  // Roteiro da triagem
-  const etapas = [
-    {
-      pergunta: "Olá! Eu sou o Ôjas Bot, assistente de primeiro contato do " + OJAS_CONFIG.nomeAnfitriao + ". Para começarmos, qual é o seu nome?",
-      tipo: "texto",
-      placeholder: "Digite seu nome",
-      chave: "nome",
-    },
-    {
-      pergunta: (r) => `Prazer, ${r.nome}. Você prefere atendimento presencial (região central de Curitiba) ou online?`,
-      tipo: "opcoes",
-      opcoes: ["Presencial — Curitiba", "Online"],
-      chave: "modalidade",
-    },
-    {
-      pergunta: "E o atendimento é para qual faixa de idade?",
-      tipo: "opcoes",
-      opcoes: ["Jovem", "Adulto", "Idoso"],
-      chave: "publico",
-    },
-    {
-      pergunta: "Se quiser, conte brevemente o que te motivou a buscar atendimento (você pode pular esta pergunta).",
-      tipo: "texto",
-      placeholder: "Escreva aqui ou clique em Pular",
-      chave: "motivo",
-      opcional: true,
-    },
-    {
-      pergunta: "Por fim, qual o melhor dia e horário para retornarmos o contato?",
-      tipo: "texto",
-      placeholder: "Ex.: terças à tarde",
-      chave: "melhorHorario",
-    },
-  ];
-
-  function iniciar() {
-    executarEtapa(0);
-  }
-
-  function executarEtapa(indice) {
-    etapaAtual = indice;
-
-    if (indice >= etapas.length) {
-      finalizarTriagem();
+    if (!OJAS_CONFIG.webhookUrl) {
+      bolhaDigitando.remove();
+      falarBot("O bot ainda não está conectado ao n8n. Configure OJAS_CONFIG.webhookUrl no arquivo ojas-bot.js.");
+      travarEntrada(false);
       return;
     }
 
-    const etapa = etapas[indice];
-    const textoPergunta = typeof etapa.pergunta === "function" ? etapa.pergunta(respostas) : etapa.pergunta;
+    try {
+      const resposta = await fetch(OJAS_CONFIG.webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatInput: texto, sessionId }),
+      });
 
-    setTimeout(() => {
-      falarBot(textoPergunta);
+      if (!resposta.ok) throw new Error("Resposta HTTP " + resposta.status);
 
-      if (etapa.tipo === "opcoes") {
-        desabilitarTexto();
-        mostrarOpcoes(etapa.opcoes, (escolha) => {
-          respostas[etapa.chave] = escolha;
-          executarEtapa(indice + 1);
-        });
-      } else {
-        limparOpcoes();
-        if (etapa.opcional) {
-          mostrarOpcoes(["Pular"], () => {
-            respostas[etapa.chave] = "(não informado)";
-            desabilitarTexto();
-            executarEtapa(indice + 1);
-          });
-        }
-        habilitarTexto(etapa.placeholder, etapa.opcional);
-      }
-    }, 350);
+      const dados = await resposta.json();
+      const textoResposta = dados.output || dados.text || dados.reply || "Recebi sua mensagem, mas não consegui montar uma resposta agora.";
+
+      bolhaDigitando.remove();
+      falarBot(textoResposta);
+    } catch (erro) {
+      bolhaDigitando.remove();
+      falarBot(
+        "Não consegui falar com o servidor agora. Você pode continuar direto pelo WhatsApp: " +
+        "https://wa.me/" + OJAS_CONFIG.whatsappNumero
+      );
+      console.error("Ôjas Bot — falha ao chamar o webhook:", erro);
+    } finally {
+      travarEntrada(false);
+      inputEl.focus();
+    }
   }
 
   formEl.addEventListener("submit", (evento) => {
     evento.preventDefault();
-    if (!aguardandoTexto) return;
-
     const valor = inputEl.value.trim();
     if (!valor) return;
-
-    const etapa = etapas[etapaAtual];
-    falarUsuario(valor);
-    respostas[etapa.chave] = valor;
-    desabilitarTexto();
-    executarEtapa(etapaAtual + 1);
+    inputEl.value = "";
+    enviarMensagem(valor);
   });
 
-  function montarResumoTexto() {
-    return (
-      `Olá, ${OJAS_CONFIG.nomeAnfitriao}! Vim pelo site e passei pela triagem do Ôjas Bot:\n\n` +
-      `Nome: ${respostas.nome}\n` +
-      `Modalidade: ${respostas.modalidade}\n` +
-      `Faixa etária: ${respostas.publico}\n` +
-      `Motivo: ${respostas.motivo}\n` +
-      `Melhor dia/horário para contato: ${respostas.melhorHorario}`
-    );
-  }
-
-  function enviarParaWebhook() {
-    if (!OJAS_CONFIG.webhookUrl) return;
-    fetch(OJAS_CONFIG.webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ origem: "ojas-bot-site", respostas, criadoEm: new Date().toISOString() }),
-    }).catch(() => {
-      /* Falha silenciosa: o WhatsApp continua como canal de confirmação. */
-    });
-  }
-
-  function finalizarTriagem() {
-    falarBot("Perfeito, já tenho tudo que preciso! Veja o resumo abaixo e confirme pelo WhatsApp para agendarmos.");
-    enviarParaWebhook();
-
-    resumoEl.hidden = false;
-    resumoEl.innerHTML = `
-      <dl>
-        <dt>Nome</dt><dd>${respostas.nome}</dd>
-        <dt>Modalidade</dt><dd>${respostas.modalidade}</dd>
-        <dt>Faixa etária</dt><dd>${respostas.publico}</dd>
-        <dt>Motivo</dt><dd>${respostas.motivo}</dd>
-        <dt>Melhor horário</dt><dd>${respostas.melhorHorario}</dd>
-      </dl>
-      <a class="btn btn-primaria" style="margin-top:14px" target="_blank" rel="noopener"
-         href="https://wa.me/${OJAS_CONFIG.whatsappNumero}?text=${encodeURIComponent(montarResumoTexto())}">
-        Confirmar pelo WhatsApp
-      </a>
-    `;
-    rolarParaFinal();
-  }
-
-  iniciar();
+  falarBot(
+    "Olá! Eu sou o Ôjas Bot, assistente de primeiro contato do " + OJAS_CONFIG.nomeAnfitriao + ". " +
+    "Pode me contar seu nome pra começarmos?"
+  );
+  travarEntrada(false);
+  inputEl.focus();
 })();
