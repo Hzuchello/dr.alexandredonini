@@ -150,5 +150,4 @@ const OJAS_CONFIG = {
     "Pode me contar seu nome pra começarmos?"
   );
   travarEntrada(false);
-  inputEl.focus();
 })();
