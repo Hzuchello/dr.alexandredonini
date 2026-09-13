@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Agenda | Alexandre Donnini</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin-body">
+
+<!-- TELA DE LOGIN -->
+<div id="login-view" class="login-tela">
+  <form id="login-form" class="login-card" novalidate>
+    <div class="marca" style="justify-content:center; margin-bottom: 22px;">
+      <svg class="marca-triangulo" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M50 6 L94 84 L6 84 Z" fill="none" stroke="#33422C" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+      <div class="marca-texto">Alexandre Donnini
+        <small>Área administrativa</small>
+      </div>
+    </div>
+    <label for="login-email">E-mail
+      <input type="email" id="login-email" name="email" required autocomplete="username" inputmode="email">
+    </label>
+    <label for="login-senha">Senha
+      <input type="password" id="login-senha" name="password" required autocomplete="current-password">
+    </label>
+    <button type="submit" id="btn-entrar" class="btn btn-primaria" style="width:100%; justify-content:center;">Entrar</button>
+    <p id="login-erro" class="login-erro" hidden role="alert"></p>
+  </form>
+</div>
+
+<!-- APP (CALENDÁRIO) -->
+<div id="app-view" class="admin-app" hidden>
+  <header class="admin-topo">
+    <div class="marca">
+      <svg class="marca-triangulo" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M50 6 L94 84 L6 84 Z" fill="none" stroke="#33422C" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+      <div class="marca-texto">Agenda
+        <small>Área administrativa</small>
+      </div>
+    </div>
+    <div class="admin-topo-acoes">
+      <button type="button" id="btn-hoje" class="btn btn-secundaria">Hoje</button>
+      <button type="button" id="btn-sair" class="btn btn-secundaria">Sair</button>
+    </div>
+  </header>
+
+  <main class="admin-conteudo">
+    <div class="calendario-nav">
+      <button type="button" id="mes-anterior" class="btn-icone" aria-label="Mês anterior">‹</button>
+      <h2 id="mes-titulo">—</h2>
+      <button type="button" id="mes-seguinte" class="btn-icone" aria-label="Próximo mês">›</button>
+    </div>
+
+    <div class="calendario-semana" aria-hidden="true">
+      <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+    </div>
+
+    <div id="calendario-grade" class="calendario-grade" role="grid" aria-label="Calendário de agendamentos"></div>
+    <p id="calendario-status" class="calendario-status" hidden role="status"></p>
+  </main>
+
+<!-- PAINEL LATERAL DO DIA -->
+<div id="painel-dia" class="painel-dia" hidden>
+  <div class="painel-dia-fundo" data-fechar></div>
+  <div class="painel-dia-conteudo" role="dialog" aria-modal="true" aria-labelledby="painel-dia-titulo">
+    <div class="painel-dia-topo">
+      <h3 id="painel-dia-titulo">—</h3>
+      <button type="button" class="btn-icone" data-fechar aria-label="Fechar">×</button>
+    </div>
+
+    <div id="lista-agendamentos" class="lista-agendamentos"></div>
+
+    <details class="novo-agendamento" id="detalhes-novo">
+      <summary>+ Novo agendamento</summary>
+      <form id="form-novo" novalidate>
+        <label for="novo-nome">Nome completo
+          <input type="text" id="novo-nome" name="nome" required maxlength="120" autocomplete="name">
+        </label>
+        <label for="novo-telefone">Telefone (WhatsApp)
+          <input type="tel" id="novo-telefone" name="telefone" placeholder="41 99999-8888" required inputmode="tel" autocomplete="tel">
+        </label>
+        <div class="form-linha">
+          <label for="novo-modalidade">Modalidade
+            <select id="novo-modalidade" name="modalidade">
+              <option value="presencial">Presencial</option>
+              <option value="online">Online</option>
+            </select>
+          </label>
+          <label for="novo-faixa">Faixa etária
+            <select id="novo-faixa" name="faixa">
+              <option value="">—</option>
+              <option value="jovem">Jovem</option>
+              <option value="adulto">Adulto</option>
+              <option value="idoso">Idoso</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-linha">
+          <label for="novo-inicio">Início
+            <input type="time" id="novo-inicio" name="inicio" required>
+          </label>
+          <label for="novo-fim">Fim
+            <input type="time" id="novo-fim" name="fim" required>
+          </label>
+        </div>
+        <label for="novo-obs">Observações
+          <input type="text" id="novo-obs" name="obs" maxlength="280">
+        </label>
+        <button type="submit" id="btn-salvar-novo" class="btn btn-primaria" style="width:100%; justify-content:center;">Salvar agendamento</button>
+        <p id="novo-erro" class="login-erro" hidden role="alert"></p>
+      </form>
+    </details>
+  </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
