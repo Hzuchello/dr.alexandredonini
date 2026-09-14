@@ -286,17 +286,19 @@
 }
 
 .agendamento-item {
-  background: var(--branco);
-  border: 1px solid var(--linha);
-  border-left: 3px solid var(--verde);
-  border-radius: 3px;
-  padding: 12px 14px;
+  background: var(--creme-claro);
+  border: 1px solid var(--creme-escuro);
+  border-left: 4px solid var(--verde);
+  border-radius: 6px;
+  padding: 14px 16px;
   font-size: 0.9rem;
+  color: var(--verde-escuro);
 }
 
 .agendamento-item.cancelado {
-  border-left-color: var(--linha);
-  opacity: 0.6;
+  border-left-color: var(--creme-escuro);
+  background: var(--creme);
+  opacity: 0.7;
 }
 
 .agendamento-item .horario {
@@ -309,38 +311,55 @@
 .agendamento-item .status-tag {
   font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--verde-claro);
-  margin-left: 6px;
+  letter-spacing: 0.04em;
+  color: var(--creme);
+  background: var(--verde);
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  vertical-align: middle;
+}
+
+.agendamento-item.cancelado .status-tag {
+  background: var(--verde-claro);
+  color: var(--creme-claro);
 }
 
 .agendamento-item p {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   max-width: none;
+  color: var(--texto);
 }
 
 .agendamento-acoes {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
-.agendamento-acoes button {
-  background: none;
-  border: none;
-  color: var(--verde);
+.btn-cancelar {
+  background: var(--verde);
+  border: 1px solid var(--verde-escuro);
+  color: var(--creme);
+  font-family: var(--sans);
   font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
+  padding: 8px 16px;
+  border-radius: 3px;
+  text-decoration: none;
 }
 
-.agendamento-acoes button:disabled {
+.btn-cancelar:hover {
+  background: var(--verde-escuro);
+  color: var(--creme-claro);
+}
+
+.btn-cancelar:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
-.agendamento-acoes button.excluir { color: #8a2c2c; }
 
 .sem-agendamentos {
   color: var(--verde-claro);
