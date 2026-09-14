@@ -140,10 +140,26 @@
   gap: 10px;
 }
 
+.admin-app {
+  min-height: 100vh;
+  background: var(--verde-escuro);
+}
+
 .admin-conteudo {
   max-width: 720px;
   margin: 0 auto;
   padding: 32px 20px 80px;
+}
+
+.admin-topo-acoes .btn {
+  background: var(--creme);
+  border: 1px solid var(--creme-escuro);
+  color: var(--verde-escuro);
+}
+
+.admin-topo-acoes .btn:hover {
+  background: var(--creme-claro);
+  color: var(--verde);
 }
 
 /* ---------- Calendário ---------- */
@@ -159,15 +175,16 @@
   font-size: 1.4rem;
   margin: 0;
   text-transform: capitalize;
+  color: var(--creme);
 }
 
 .btn-icone {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1px solid var(--verde-escuro);
-  background: var(--verde);
-  color: var(--creme);
+  border: 1px solid var(--creme-escuro);
+  background: var(--creme);
+  color: var(--verde-escuro);
   font-size: 1.2rem;
   cursor: pointer;
   display: flex;
@@ -176,9 +193,9 @@
 }
 
 .btn-icone:hover:not(:disabled) {
-  border-color: var(--verde-escuro);
-  background: var(--verde-escuro);
-  color: var(--creme-claro);
+  border-color: var(--creme);
+  background: var(--creme-claro);
+  color: var(--verde);
 }
 
 .calendario-semana {
@@ -186,7 +203,7 @@
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
   font-size: 0.78rem;
-  color: var(--verde);
+  color: var(--creme);
   font-weight: 600;
   margin-bottom: 6px;
 }
@@ -210,9 +227,9 @@
 
 .dia {
   aspect-ratio: 1;
-  border: 2px solid var(--verde-escuro);
+  border: 2px solid var(--creme-escuro);
   border-radius: 4px;
-  background: var(--verde);
+  background: var(--creme);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -221,13 +238,13 @@
   cursor: pointer;
   font-size: 1.28rem;
   font-weight: 600;
-  color: var(--creme);
+  color: var(--verde-escuro);
 }
 
 .dia:hover,
 .dia:focus-visible {
-  border-color: var(--verde-escuro);
-  background: var(--verde-escuro);
+  border-color: var(--creme);
+  background: var(--creme-claro);
 }
 
 .dia:focus-visible {
@@ -241,15 +258,15 @@
 }
 
 .dia.hoje {
-  border-color: var(--verde-escuro);
-  box-shadow: inset 0 0 0 2px var(--creme);
+  border-color: var(--verde);
+  box-shadow: inset 0 0 0 2px var(--verde);
   font-weight: 600;
 }
 
 .dia.selecionado {
-  background: var(--verde-escuro);
-  border-color: var(--verde-escuro);
-  color: var(--creme-claro);
+  background: var(--creme-claro);
+  border-color: var(--verde);
+  color: var(--verde-escuro);
 }
 
 .dia-badge {
