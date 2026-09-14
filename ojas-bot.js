@@ -18,7 +18,7 @@
    ========================================================= */
 
 const OJAS_CONFIG = {
-  webhookUrl: "https://overfunctioning-undefensibly-johnette.ngrok-free.dev/webhook/c52ad3f1-d3bc-4410-885b-51f3e04c799b/chat",
+  webhookUrl: "https://overfunctioning-undefensibly-johnette.ngrok-free.dev/webhook/1d08054d-8c65-44d8-94ea-2f199427137a/chat",
   whatsappNumero: "5541991151535", // Dr. Alexandre Donnini
   nomeAnfitriao: "Dr. Alexandre Donnini",
 };
@@ -31,17 +31,43 @@ const OJAS_CONFIG = {
   const formEl = app.querySelector("[data-ojas-form]");
   const inputEl = app.querySelector("[data-ojas-input]");
   const botaoEl = formEl.querySelector("button");
+  const btnEncerrar = app.querySelector("[data-ojas-encerrar]");
+
+  function criarSessionId() {
+    return crypto.randomUUID
+      ? crypto.randomUUID()
+      : "sess-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+  }
 
   function obterSessionId() {
     let id = localStorage.getItem("ojas-session-id");
     if (!id) {
-      id = (crypto.randomUUID ? crypto.randomUUID() : "sess-" + Date.now() + "-" + Math.random().toString(16).slice(2));
+      id = criarSessionId();
       localStorage.setItem("ojas-session-id", id);
     }
     return id;
   }
 
-  const sessionId = obterSessionId();
+  let sessionId = obterSessionId();
+
+  function mensagemInicial() {
+    falarBot(
+      "Olá! Eu sou o Ôjas Bot, assistente de primeiro contato do " +
+        OJAS_CONFIG.nomeAnfitriao +
+        ". Como posso ajudar?"
+    );
+  }
+
+  function encerrarChat() {
+    localStorage.removeItem("ojas-session-id");
+    sessionId = criarSessionId();
+    localStorage.setItem("ojas-session-id", sessionId);
+    mensagensEl.innerHTML = "";
+    inputEl.value = "";
+    travarEntrada(false);
+    mensagemInicial();
+    inputEl.focus();
+  }
 
   function rolarParaFinal() {
     mensagensEl.scrollTop = mensagensEl.scrollHeight;
@@ -145,10 +171,11 @@ const OJAS_CONFIG = {
     enviarMensagem(valor);
   });
 
-  falarBot(
-    "Olá! Eu sou o Ôjas Bot, assistente de primeiro contato do " + OJAS_CONFIG.nomeAnfitriao + ". " +
-    "Pode me contar seu nome pra começarmos?"
-  );
+  if (btnEncerrar) {
+    btnEncerrar.addEventListener("click", encerrarChat);
+  }
+
+  mensagemInicial();
   travarEntrada(false);
 
 })();
