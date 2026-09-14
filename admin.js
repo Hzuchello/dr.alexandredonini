@@ -37,7 +37,12 @@ const loginView = document.getElementById("login-view");
 const appView = document.getElementById("app-view");
 const loginForm = document.getElementById("login-form");
 const loginErro = document.getElementById("login-erro");
+const loginOk = document.getElementById("login-ok");
 const btnEntrar = document.getElementById("btn-entrar");
+const btnEsqueci = document.getElementById("btn-esqueci");
+const formNovaSenha = document.getElementById("form-nova-senha");
+const senhaErro = document.getElementById("senha-erro");
+const btnSalvarSenha = document.getElementById("btn-salvar-senha");
 const btnSair = document.getElementById("btn-sair");
 const btnHoje = document.getElementById("btn-hoje");
 
@@ -143,7 +148,18 @@ async function verificarSessao() {
   mostrarView(!!data.session);
 }
 
+function urlRecuperacao() {
+  return window.location.origin + window.location.pathname;
+}
+
+function mostrarFormularioRecuperacao(mostrar) {
+  if (!formNovaSenha) return;
+  loginForm.hidden = mostrar;
+  formNovaSenha.hidden = !mostrar;
+}
+
 function mostrarView(logado) {
+  if (logado) mostrarFormularioRecuperacao(false);
   loginView.hidden = logado;
   appView.hidden = !logado;
   if (!logado) {
@@ -171,6 +187,65 @@ function iniciarAtualizacaoAgenda() {
     if (document.hidden) return;
     carregarMes(true);
   }, INTERVALO_AGENDA_MS);
+}
+
+if (btnEsqueci) {
+  btnEsqueci.addEventListener("click", async () => {
+    limparErro(loginErro);
+    if (loginOk) loginOk.hidden = true;
+    const email = document.getElementById("login-email").value.trim();
+    if (!email) {
+      mostrarErro(loginErro, "Informe o e-mail cadastrado para enviar o link.");
+      document.getElementById("login-email").focus();
+      return;
+    }
+    if (!cliente || configInvalida()) {
+      mostrarErro(loginErro, "Configure a chave anon do Supabase em admin.js.");
+      return;
+    }
+    btnEsqueci.disabled = true;
+    const { error } = await cliente.auth.resetPasswordForEmail(email, {
+      redirectTo: urlRecuperacao(),
+    });
+    btnEsqueci.disabled = false;
+    if (error) {
+      mostrarErro(loginErro, mensagemAmigavel(error, "Não foi possível enviar o e-mail de recuperação."));
+      return;
+    }
+    if (loginOk) {
+      loginOk.textContent = "Se este e-mail estiver cadastrado, enviamos um link para redefinir a senha.";
+      loginOk.hidden = false;
+    }
+  });
+}
+
+if (formNovaSenha) {
+  formNovaSenha.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    limparErro(senhaErro);
+    const senha = document.getElementById("nova-senha").value;
+    const senha2 = document.getElementById("nova-senha-2").value;
+    if (!senha || senha.length < 6) {
+      mostrarErro(senhaErro, "A senha precisa ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (senha !== senha2) {
+      mostrarErro(senhaErro, "As senhas não coincidem.");
+      return;
+    }
+    btnSalvarSenha.disabled = true;
+    btnSalvarSenha.textContent = "Salvando...";
+    const { error } = await cliente.auth.updateUser({ password: senha });
+    btnSalvarSenha.disabled = false;
+    btnSalvarSenha.textContent = "Salvar senha";
+    if (error) {
+      mostrarErro(senhaErro, mensagemAmigavel(error, "Não foi possível salvar a nova senha."));
+      return;
+    }
+    formNovaSenha.reset();
+    mostrarFormularioRecuperacao(false);
+    mostrarView(true);
+  });
 }
 
 loginForm.addEventListener("submit", async (evento) => {
@@ -213,7 +288,12 @@ btnSair.addEventListener("click", async () => {
 });
 
 if (cliente) {
-  cliente.auth.onAuthStateChange((_evento, sessao) => {
+  cliente.auth.onAuthStateChange((eventoAuth, sessao) => {
+    if (eventoAuth === "PASSWORD_RECOVERY") {
+      mostrarView(false);
+      mostrarFormularioRecuperacao(true);
+      return;
+    }
     const logado = !!sessao;
     if (loginView.hidden !== logado) mostrarView(logado);
   });
