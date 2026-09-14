@@ -583,6 +583,7 @@ if (modalRealizado) {
     modalTexto?.focus();
   });
   document.getElementById("modal-realizado-nao")?.addEventListener("click", () => concluirRealizado(""));
+  document.getElementById("modal-realizado-abortar")?.addEventListener("click", () => fecharModalRealizado());
   document.getElementById("modal-realizado-salvar")?.addEventListener("click", () => {
     concluirRealizado((modalTexto && modalTexto.value.trim()) || "");
   });
