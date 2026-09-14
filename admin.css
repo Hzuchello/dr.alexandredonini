@@ -325,9 +325,15 @@
 }
 
 .agendamento-item.cancelado {
-  border-left-color: var(--creme-escuro);
-  background: var(--creme);
-  opacity: 0.7;
+  border-left: 3px solid #8B2E2E;
+  background: #F3E4DC;
+  opacity: 0.88;
+}
+
+.agendamento-item.realizado {
+  border-left: 3px solid var(--verde);
+  background: #E8EDE4;
+  opacity: 0.88;
 }
 
 .agendamento-item .horario {
@@ -350,8 +356,13 @@
 }
 
 .agendamento-item.cancelado .status-tag {
-  background: var(--verde-claro);
-  color: var(--creme-claro);
+  background: #8B2E2E;
+  color: #fff;
+}
+
+.agendamento-item.realizado .status-tag {
+  background: var(--verde);
+  color: var(--creme);
 }
 
 .agendamento-item p {
@@ -366,26 +377,43 @@
   margin-top: 12px;
 }
 
-.btn-cancelar {
-  background: var(--verde);
-  border: 1px solid var(--verde-escuro);
-  color: var(--creme);
+.btn-cancelar,
+.btn-realizado {
   font-family: var(--sans);
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   cursor: pointer;
   padding: 8px 16px;
+  min-width: 108px;
   border-radius: 3px;
   text-decoration: none;
 }
 
+.btn-cancelar {
+  background: #8B2E2E;
+  border: 1px solid #6E2222;
+  color: #fff;
+}
+
 .btn-cancelar:hover {
+  background: #6E2222;
+  color: #fff;
+}
+
+.btn-realizado {
+  background: var(--verde);
+  border: 1px solid var(--verde-escuro);
+  color: var(--creme);
+}
+
+.btn-realizado:hover {
   background: var(--verde-escuro);
   color: var(--creme-claro);
 }
 
-.btn-cancelar:disabled {
+.btn-cancelar:disabled,
+.btn-realizado:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
