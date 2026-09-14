@@ -68,7 +68,7 @@ let agendamentosDoMes = [];
 let diaSelecionado = null;
 let operacaoEmAndamento = false;
 let timerAgenda = null;
-const INTERVALO_AGENDA_MS = 8000;
+const INTERVALO_AGENDA_MS = 10000;
 const CHAVE_REALIZADOS = "ojas-admin-realizados";
 const CHAVE_OBS_LOCAL = "ojas-admin-obs-realizados";
 const cardsArquivadosAbertos = new Set();
@@ -472,7 +472,8 @@ function desenharListaDoDia() {
   doDia.forEach((agendamento) => {
     const item = document.createElement("div");
     const cancelado = agendamento.status === "cancelado";
-    const realizadoLocal = !cancelado && estaArquivadoLocal(agendamento.id);
+    const realizadoLocal =
+      !cancelado && (agendamento.status === "realizado" || estaArquivadoLocal(agendamento.id));
     const arquivado = cancelado || realizadoLocal;
     item.className =
       "agendamento-item" +
@@ -554,7 +555,7 @@ function horariosSobrepostos(novoInicio, novoFim, ignorarId) {
   const fim = horaParaMinutos(novoFim);
   return agendamentosDoMes.some((a) => {
     if (a.data !== diaSelecionado) return false;
-    if (a.status === "cancelado") return false;
+    if (a.status === "cancelado" || a.status === "realizado") return false;
     if (ignorarId && a.id === ignorarId) return false;
     const aIni = horaParaMinutos(a.hora_inicio);
     const aFim = horaParaMinutos(a.hora_fim);
@@ -588,18 +589,21 @@ function abrirModalRealizado(id) {
 async function concluirRealizado(nota) {
   const id = idPendenteRealizado;
   fecharModalRealizado();
-  if (!id) return;
-  if (nota) {
-    salvarNotaRealizadoLocal(id, nota);
-    const atual = agendamentosDoMes.find((a) => String(a.id) === String(id));
-    const junta = [atual && atual.observacoes, nota].filter(Boolean).join(" · ");
-    if (cliente) {
-      await cliente.from("agendamentos").update({ observacoes: junta }).eq("id", id);
-    }
-    if (atual) atual.observacoes = junta;
+  if (!id || !cliente) return;
+  const atual = agendamentosDoMes.find((a) => String(a.id) === String(id));
+  const junta = nota
+    ? [atual && atual.observacoes, nota].filter(Boolean).join(" · ")
+    : atual && atual.observacoes;
+  const payload = { status: "realizado" };
+  if (nota) payload.observacoes = junta;
+  const { error } = await cliente.from("agendamentos").update(payload).eq("id", id);
+  if (error) {
+    alert(mensagemAmigavel(error, "Não foi possível marcar como realizado. Confira se a coluna status aceita esse valor."));
+    return;
   }
+  if (nota) salvarNotaRealizadoLocal(id, nota);
   arquivarLocal(id);
-  desenharListaDoDia();
+  await carregarMes(false);
 }
 
 function marcarRealizadoNaTela(id) {
