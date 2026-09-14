@@ -503,8 +503,12 @@ function desenharListaDoDia() {
       obs +
       (mostrarAcoes
         ? '<div class="agendamento-acoes">' +
-          '<button type="button" class="btn-cancelar" data-acao="cancelar">Cancelar</button>' +
-          '<button type="button" class="btn-realizado" data-acao="realizado">Realizado</button>' +
+          '<button type="button" class="btn-cancelar" data-acao="cancelar" title="Cancelar" aria-label="Cancelar">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 6.4 12 12l5.6 5.6M17.6 6.4 12 12 6.4 17.6"/></svg>' +
+          "</button>" +
+          '<button type="button" class="btn-realizado" data-acao="realizado" title="Realizado" aria-label="Realizado">' +
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7"/></svg>' +
+          "</button>" +
           "</div>"
         : "");
     item.querySelector('[data-acao="cancelar"]')?.addEventListener("click", () => pedirCancelamento(agendamento.id));
