@@ -142,7 +142,7 @@
 
 .admin-app {
   min-height: 100vh;
-  background: var(--verde-escuro);
+  background: var(--creme);
 }
 
 .admin-conteudo {
@@ -152,14 +152,14 @@
 }
 
 .admin-topo-acoes .btn {
-  background: var(--creme);
-  border: 1px solid var(--creme-escuro);
-  color: var(--verde-escuro);
+  background: var(--verde);
+  border: 1px solid var(--verde-escuro);
+  color: var(--creme);
 }
 
 .admin-topo-acoes .btn:hover {
-  background: var(--creme-claro);
-  color: var(--verde);
+  background: var(--verde-escuro);
+  color: var(--creme-claro);
 }
 
 /* ---------- Calendário ---------- */
@@ -175,15 +175,15 @@
   font-size: 1.4rem;
   margin: 0;
   text-transform: capitalize;
-  color: var(--creme);
+  color: var(--verde-escuro);
 }
 
 .btn-icone {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1px solid #2A2C28;
-  background: #3D403C;
+  border: 1px solid var(--verde-escuro);
+  background: var(--verde);
   color: var(--creme);
   font-size: 1.2rem;
   cursor: pointer;
@@ -193,8 +193,8 @@
 }
 
 .btn-icone:hover:not(:disabled) {
-  border-color: #1F211E;
-  background: #2F322F;
+  border-color: var(--verde-escuro);
+  background: var(--verde-escuro);
   color: var(--creme-claro);
 }
 
@@ -203,7 +203,7 @@
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
   font-size: 0.78rem;
-  color: var(--creme);
+  color: var(--verde);
   font-weight: 600;
   margin-bottom: 6px;
 }
@@ -227,9 +227,9 @@
 
 .dia {
   aspect-ratio: 1;
-  border: 2px solid #2A2C28;
+  border: 2px solid var(--verde-escuro);
   border-radius: 4px;
-  background: #3D403C;
+  background: var(--verde);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -243,8 +243,8 @@
 
 .dia:hover,
 .dia:focus-visible {
-  border-color: #1F211E;
-  background: #2F322F;
+  border-color: var(--verde-escuro);
+  background: var(--verde-escuro);
 }
 
 .dia:focus-visible {
@@ -258,14 +258,14 @@
 }
 
 .dia.hoje {
-  border-color: var(--creme);
+  border-color: var(--verde-escuro);
   box-shadow: inset 0 0 0 2px var(--creme);
   font-weight: 600;
 }
 
 .dia.selecionado {
-  background: #2F322F;
-  border-color: var(--creme);
+  background: var(--verde-escuro);
+  border-color: var(--verde-escuro);
   color: var(--creme-claro);
 }
 
