@@ -62,6 +62,8 @@ mesAtual.setHours(0, 0, 0, 0);
 let agendamentosDoMes = [];
 let diaSelecionado = null;
 let operacaoEmAndamento = false;
+let timerAgenda = null;
+const INTERVALO_AGENDA_MS = 10000;
 
 const NOMES_MES = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -145,11 +147,30 @@ function mostrarView(logado) {
   loginView.hidden = logado;
   appView.hidden = !logado;
   if (!logado) {
+    pararAtualizacaoAgenda();
     fecharPainelDia();
     agendamentosDoMes = [];
     return;
   }
-  carregarMes();
+  carregarMes(false);
+  iniciarAtualizacaoAgenda();
+}
+
+function pararAtualizacaoAgenda() {
+  if (timerAgenda) {
+    clearInterval(timerAgenda);
+    timerAgenda = null;
+  }
+}
+
+function iniciarAtualizacaoAgenda() {
+  pararAtualizacaoAgenda();
+  timerAgenda = setInterval(() => {
+    if (appView.hidden) return;
+    if (operacaoEmAndamento) return;
+    if (document.hidden) return;
+    carregarMes(true);
+  }, INTERVALO_AGENDA_MS);
 }
 
 loginForm.addEventListener("submit", async (evento) => {
@@ -200,12 +221,14 @@ if (cliente) {
 
 /* ---------- Calendário ---------- */
 
-async function carregarMes() {
+async function carregarMes(silencioso) {
   const ano = mesAtual.getFullYear();
   const mes = mesAtual.getMonth();
   mesTitulo.textContent = NOMES_MES[mes] + " de " + ano;
-  limparErro(calendarioStatus);
-  calendarioGrade.classList.add("carregando");
+  if (!silencioso) {
+    limparErro(calendarioStatus);
+    calendarioGrade.classList.add("carregando");
+  }
 
   const primeiroDia = dataParaISO(new Date(ano, mes, 1));
   const ultimoDia = dataParaISO(new Date(ano, mes + 1, 0));
@@ -225,13 +248,12 @@ async function carregarMes() {
     .order("hora_inicio", { ascending: true });
 
   agendamentosDoMes = error ? [] : (data || []);
-  if (error) {
+  if (error && !silencioso) {
     mostrarErro(calendarioStatus, mensagemAmigavel(error, "Não foi possível carregar os agendamentos."));
   }
 
   desenharGrade();
   calendarioGrade.classList.remove("carregando");
-
   if (diaSelecionado) desenharListaDoDia();
 }
 
@@ -254,12 +276,15 @@ function desenharGrade() {
     const dataAtual = new Date(ano, mes, dia);
     const iso = dataParaISO(dataAtual);
     const confirmados = agendamentosDoMes.filter((a) => a.data === iso && a.status === "confirmado");
-
     const celula = document.createElement("button");
     celula.type = "button";
     celula.className = "dia" + (iso === hojeISO() ? " hoje" : "") + (iso === diaSelecionado ? " selecionado" : "");
-    celula.setAttribute("aria-label", formatarDataTitulo(iso) + (confirmados.length ? ", " + confirmados.length + " agendamento(s)" : ""));
-    celula.innerHTML = String(dia) + (confirmados.length ? '<span class="dia-badge">' + confirmados.length + "</span>" : "");
+    celula.setAttribute(
+      "aria-label",
+      formatarDataTitulo(iso) + (confirmados.length ? ", " + confirmados.length + " agendamento(s)" : "")
+    );
+    celula.innerHTML =
+      String(dia) + (confirmados.length ? '<span class="dia-badge">' + confirmados.length + "</span>" : "");
     celula.addEventListener("click", () => abrirPainelDia(iso));
     calendarioGrade.appendChild(celula);
   }
@@ -267,18 +292,18 @@ function desenharGrade() {
 
 btnMesAnterior.addEventListener("click", () => {
   mesAtual.setMonth(mesAtual.getMonth() - 1);
-  carregarMes();
+  carregarMes(false);
 });
 
 btnMesSeguinte.addEventListener("click", () => {
   mesAtual.setMonth(mesAtual.getMonth() + 1);
-  carregarMes();
+  carregarMes(false);
 });
 
 btnHoje.addEventListener("click", () => {
   const agora = new Date();
   mesAtual = new Date(agora.getFullYear(), agora.getMonth(), 1);
-  carregarMes().then(() => abrirPainelDia(hojeISO()));
+  carregarMes(false).then(() => abrirPainelDia(hojeISO()));
 });
 
 /* ---------- Painel do dia ---------- */
@@ -330,10 +355,8 @@ function desenharListaDoDia() {
   doDia.forEach((agendamento) => {
     const item = document.createElement("div");
     item.className = "agendamento-item" + (agendamento.status === "cancelado" ? " cancelado" : "");
-
     const faixa = agendamento.faixa_etaria ? " · " + escaparHtml(agendamento.faixa_etaria) : "";
     const obs = agendamento.observacoes ? "<p>" + escaparHtml(agendamento.observacoes) + "</p>" : "";
-
     item.innerHTML =
       '<span class="horario">' +
       escaparHtml(normalizarHora(agendamento.hora_inicio)) +
@@ -357,7 +380,6 @@ function desenharListaDoDia() {
       (agendamento.status !== "cancelado" ? '<button type="button" data-acao="cancelar">Cancelar</button>' : "") +
       '<button type="button" data-acao="excluir" class="excluir">Excluir</button>' +
       "</div>";
-
     item.querySelector('[data-acao="cancelar"]')?.addEventListener("click", () => atualizarStatus(agendamento.id, "cancelado"));
     item.querySelector('[data-acao="excluir"]').addEventListener("click", () => excluirAgendamento(agendamento.id));
     listaAgendamentos.appendChild(item);
@@ -386,33 +408,27 @@ function horariosSobrepostos(novoInicio, novoFim, ignorarId) {
 async function atualizarStatus(id, novoStatus) {
   if (operacaoEmAndamento || !cliente) return;
   if (novoStatus === "cancelado" && !confirm("Cancelar este agendamento?")) return;
-
   operacaoEmAndamento = true;
   const { error } = await cliente.from("agendamentos").update({ status: novoStatus }).eq("id", id);
   operacaoEmAndamento = false;
-
   if (error) {
     alert(mensagemAmigavel(error, "Não foi possível atualizar o status."));
     return;
   }
-
-  await carregarMes();
+  await carregarMes(false);
 }
 
 async function excluirAgendamento(id) {
   if (operacaoEmAndamento || !cliente) return;
   if (!confirm("Excluir este agendamento definitivamente?")) return;
-
   operacaoEmAndamento = true;
   const { error } = await cliente.from("agendamentos").delete().eq("id", id);
   operacaoEmAndamento = false;
-
   if (error) {
     alert(mensagemAmigavel(error, "Não foi possível excluir o agendamento."));
     return;
   }
-
-  await carregarMes();
+  await carregarMes(false);
 }
 
 /* ---------- Novo agendamento ---------- */
@@ -466,9 +482,9 @@ formNovo.addEventListener("submit", async (evento) => {
 
   btnSalvarNovo.disabled = true;
   btnSalvarNovo.textContent = "Salvando...";
-
+  operacaoEmAndamento = true;
   const { error } = await cliente.from("agendamentos").insert(novo);
-
+  operacaoEmAndamento = false;
   btnSalvarNovo.disabled = false;
   btnSalvarNovo.textContent = "Salvar agendamento";
 
@@ -479,7 +495,7 @@ formNovo.addEventListener("submit", async (evento) => {
 
   formNovo.reset();
   if (detalhesNovo) detalhesNovo.open = false;
-  await carregarMes();
+  await carregarMes(false);
 });
 
 verificarSessao();
