@@ -70,6 +70,7 @@ let operacaoEmAndamento = false;
 let timerAgenda = null;
 const INTERVALO_AGENDA_MS = 10000;
 const CHAVE_REALIZADOS = "ojas-admin-realizados";
+const CHAVE_OBS_LOCAL = "ojas-admin-obs-realizados";
 
 function idsRealizadosLocal() {
   try {
@@ -88,6 +89,21 @@ function arquivarLocal(id) {
   const set = new Set(idsRealizadosLocal());
   set.add(String(id));
   sessionStorage.setItem(CHAVE_REALIZADOS, JSON.stringify(Array.from(set)));
+}
+
+function notasRealizadoLocal() {
+  try {
+    const mapa = JSON.parse(sessionStorage.getItem(CHAVE_OBS_LOCAL) || "{}");
+    return mapa && typeof mapa === "object" ? mapa : {};
+  } catch (erro) {
+    return {};
+  }
+}
+
+function salvarNotaRealizadoLocal(id, texto) {
+  const mapa = notasRealizadoLocal();
+  mapa[String(id)] = texto;
+  sessionStorage.setItem(CHAVE_OBS_LOCAL, JSON.stringify(mapa));
 }
 
 const NOMES_MES = [
@@ -461,7 +477,9 @@ function desenharListaDoDia() {
       (cancelado ? " cancelado" : "") +
       (realizadoLocal ? " realizado" : "");
     const faixa = agendamento.faixa_etaria ? " · " + escaparHtml(agendamento.faixa_etaria) : "";
-    const obs = agendamento.observacoes ? "<p>" + escaparHtml(agendamento.observacoes) + "</p>" : "";
+    const notaLocal = notasRealizadoLocal()[String(agendamento.id)] || "";
+    const textoObs = [agendamento.observacoes, notaLocal].filter(Boolean).join(" · ");
+    const obs = textoObs ? "<p>" + escaparHtml(textoObs) + "</p>" : "";
     const rotuloStatus = cancelado ? "cancelado" : realizadoLocal ? "realizado" : (agendamento.status || "");
     const mostrarAcoes = !cancelado && !realizadoLocal;
     item.innerHTML =
@@ -514,7 +532,21 @@ function horariosSobrepostos(novoInicio, novoFim, ignorarId) {
   });
 }
 
-function marcarRealizadoNaTela(id) {
+async function marcarRealizadoNaTela(id) {
+  let nota = "";
+  if (confirm("Deseja anotar alguma observação?")) {
+    const digitado = prompt("Observação:", "");
+    if (digitado && digitado.trim()) nota = digitado.trim();
+  }
+  if (nota) {
+    salvarNotaRealizadoLocal(id, nota);
+    const atual = agendamentosDoMes.find((a) => String(a.id) === String(id));
+    const junta = [atual && atual.observacoes, nota].filter(Boolean).join(" · ");
+    if (cliente) {
+      await cliente.from("agendamentos").update({ observacoes: junta }).eq("id", id);
+    }
+    if (atual) atual.observacoes = junta;
+  }
   arquivarLocal(id);
   desenharListaDoDia();
 }
