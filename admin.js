@@ -63,7 +63,7 @@ let agendamentosDoMes = [];
 let diaSelecionado = null;
 let operacaoEmAndamento = false;
 let timerAgenda = null;
-const INTERVALO_AGENDA_MS = 10;
+const INTERVALO_AGENDA_MS = 10000;
 
 const NOMES_MES = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
