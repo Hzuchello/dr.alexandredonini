@@ -377,11 +377,11 @@ function desenharListaDoDia() {
       "</p>" +
       obs +
       '<div class="agendamento-acoes">' +
-      (agendamento.status !== "cancelado" ? '<button type="button" data-acao="cancelar">Cancelar</button>' : "") +
-      '<button type="button" data-acao="excluir" class="excluir">Excluir</button>' +
+      (agendamento.status !== "cancelado"
+        ? '<button type="button" class="btn-cancelar" data-acao="cancelar">Cancelar</button>'
+        : "") +
       "</div>";
     item.querySelector('[data-acao="cancelar"]')?.addEventListener("click", () => atualizarStatus(agendamento.id, "cancelado"));
-    item.querySelector('[data-acao="excluir"]').addEventListener("click", () => excluirAgendamento(agendamento.id));
     listaAgendamentos.appendChild(item);
   });
 }
@@ -407,25 +407,12 @@ function horariosSobrepostos(novoInicio, novoFim, ignorarId) {
 
 async function atualizarStatus(id, novoStatus) {
   if (operacaoEmAndamento || !cliente) return;
-  if (novoStatus === "cancelado" && !confirm("Cancelar este agendamento?")) return;
+  if (novoStatus === "cancelado" && !confirm("Tem certeza que deseja cancelar?")) return;
   operacaoEmAndamento = true;
   const { error } = await cliente.from("agendamentos").update({ status: novoStatus }).eq("id", id);
   operacaoEmAndamento = false;
   if (error) {
     alert(mensagemAmigavel(error, "Não foi possível atualizar o status."));
-    return;
-  }
-  await carregarMes(false);
-}
-
-async function excluirAgendamento(id) {
-  if (operacaoEmAndamento || !cliente) return;
-  if (!confirm("Excluir este agendamento definitivamente?")) return;
-  operacaoEmAndamento = true;
-  const { error } = await cliente.from("agendamentos").delete().eq("id", id);
-  operacaoEmAndamento = false;
-  if (error) {
-    alert(mensagemAmigavel(error, "Não foi possível excluir o agendamento."));
     return;
   }
   await carregarMes(false);
