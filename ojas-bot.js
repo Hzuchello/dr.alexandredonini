@@ -18,7 +18,7 @@
    ========================================================= */
 
 const OJAS_CONFIG = {
-  webhookUrl: "https://overfunctioning-undefensibly-johnette.ngrok-free.dev/webhook/1d08054d-8c65-44d8-94ea-2f199427137a/chat",
+  webhookUrl: "https://overfunctioning-undefensibly-johnette.ngrok-free.dev/webhook/c52ad3f1-d3bc-4410-885b-51f3e04c799b/chat",
   whatsappNumero: "5541991151535", // Dr. Alexandre Donnini
   nomeAnfitriao: "Dr. Alexandre Donnini",
 };
