@@ -79,6 +79,35 @@
   margin: 0;
 }
 
+.login-ok {
+  color: var(--verde);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.login-esqueci {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--verde);
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.login-esqueci:hover {
+  color: var(--verde-escuro);
+}
+
+.login-ajuda-texto {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  color: var(--texto);
+}
+
 .btn:disabled,
 .btn-icone:disabled {
   opacity: 0.55;
