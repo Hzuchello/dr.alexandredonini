@@ -423,6 +423,70 @@
   font-size: 0.9rem;
 }
 
+.modal-site {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-site[hidden] {
+  display: none;
+}
+
+.modal-site-fundo {
+  position: absolute;
+  inset: 0;
+  background: rgba(33, 43, 28, 0.45);
+}
+
+.modal-site-caixa {
+  position: relative;
+  width: min(420px, 100%);
+  background: var(--creme-claro);
+  border: 1px solid var(--linha);
+  border-left: 4px solid var(--verde);
+  border-radius: 6px;
+  padding: 22px 22px 18px;
+  color: var(--verde-escuro);
+}
+
+.modal-site-caixa p {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  margin: 0 0 18px;
+  max-width: none;
+}
+
+.modal-site-caixa label {
+  display: block;
+  font-size: 0.82rem;
+  margin-bottom: 14px;
+}
+
+.modal-site-caixa textarea {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--linha);
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  background: var(--branco);
+  color: var(--texto);
+  resize: vertical;
+}
+
+.modal-site-acoes {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 /* ---------- Novo agendamento ---------- */
 
 .novo-agendamento summary {
