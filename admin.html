@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Agenda | Alexandre Donnini</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#33422C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agenda Donnini">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -31,7 +38,29 @@
       <input type="password" id="login-senha" name="password" required autocomplete="current-password">
     </label>
     <button type="submit" id="btn-entrar" class="btn btn-primaria" style="width:100%; justify-content:center;">Entrar</button>
+    <button type="button" id="btn-esqueci" class="login-esqueci">Esqueceu a senha?</button>
     <p id="login-erro" class="login-erro" hidden role="alert"></p>
+    <p id="login-ok" class="login-ok" hidden role="status"></p>
+  </form>
+
+  <form id="form-nova-senha" class="login-card" hidden novalidate>
+    <div class="marca" style="justify-content:center; margin-bottom: 22px;">
+      <svg class="marca-triangulo" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M50 6 L94 84 L6 84 Z" fill="none" stroke="#33422C" stroke-width="4" stroke-linejoin="round"/>
+      </svg>
+      <div class="marca-texto">Alexandre Donnini
+        <small>Nova senha</small>
+      </div>
+    </div>
+    <p class="login-ajuda-texto">Defina uma nova senha para a área administrativa.</p>
+    <label for="nova-senha">Nova senha
+      <input type="password" id="nova-senha" name="nova-senha" required minlength="6" autocomplete="new-password">
+    </label>
+    <label for="nova-senha-2">Confirmar senha
+      <input type="password" id="nova-senha-2" name="nova-senha-2" required minlength="6" autocomplete="new-password">
+    </label>
+    <button type="submit" id="btn-salvar-senha" class="btn btn-primaria" style="width:100%; justify-content:center;">Salvar senha</button>
+    <p id="senha-erro" class="login-erro" hidden role="alert"></p>
   </form>
 </div>
 
@@ -124,5 +153,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="admin.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(function () {});
+}
+</script>
 </body>
 </html>
