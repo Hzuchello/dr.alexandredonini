@@ -47,7 +47,8 @@
   <p>Somente o que você envia ou o que é necessário para o funcionamento do agendamento:</p>
   <ul>
     <li>nome completo;</li>
-    <li>número de WhatsApp (telefone com DDD);</li>
+    <li>número de WhatsApp (telefone com DDD, 11 dígitos);</li>
+    <li>endereço de e-mail (obrigatório para registrar a consulta e enviar o comprovante);</li>
     <li>data e horário pretendidos ou confirmados;</li>
     <li>modalidade da consulta (quando informada) e observações que você escrever;</li>
     <li>conteúdo das mensagens trocadas com o Ôjas Bot;</li>
@@ -59,7 +60,8 @@
   <ul>
     <li>verificar horários livres e registrar, remarcar ou cancelar consultas;</li>
     <li>identificar o agendamento pelo telefone informado;</li>
-    <li>avisar internamente o consultório quando a agenda muda;</li>
+    <li>enviar o comprovante da consulta ao e-mail que você informar;</li>
+    <li>avisar internamente o consultório (e-mail e/ou Telegram) quando a agenda muda;</li>
     <li>melhorar o funcionamento do Ôjas Bot quando você envia um feedback.</li>
   </ul>
   <p>Os dados <strong>não são vendidos</strong> e não são usados para propaganda de terceiros.</p>
@@ -68,12 +70,12 @@
   <p>O tratamento ocorre principalmente para:</p>
   <ul>
     <li><strong>execução de procedimentos preliminares</strong> a um contrato de prestação de serviço (agendar a consulta), art. 7º, V;</li>
-    <li><strong>consentimento</strong>, quando você escolhe conversar com o bot e envia nome e telefone, art. 7º, I;</li>
+    <li><strong>consentimento</strong>, quando você escolhe conversar com o bot e envia nome, telefone e e-mail, art. 7º, I;</li>
     <li><strong>legítimo interesse</strong> no funcionamento seguro do site (identificador de sessão e registros técnicos mínimos), art. 7º, IX, sem prejudicar os seus direitos.</li>
   </ul>
 
   <h2>Onde ficam e quem acessa</h2>
-  <p>Os agendamentos são gravados em banco de dados (Supabase) acessível à área administrativa do consultório. O Ôjas Bot processa a conversa por fluxo automatizado (n8n) e modelo de linguagem. Um aviso interno pode ser enviado ao profissional quando há criação ou cancelamento de horário.</p>
+  <p>Os agendamentos são gravados em banco de dados (Supabase) acessível à área administrativa do consultório. O Ôjas Bot processa a conversa por fluxo automatizado (n8n) e modelo de linguagem. Após a confirmação, um comprovante pode ser enviado ao seu e-mail. Um aviso interno pode ser enviado ao profissional (e-mail e/ou Telegram) quando há criação ou cancelamento de horário.</p>
   <p>Provedores de hospedagem e de modelo de IA processam o conteúdo o tempo necessário para gerar a resposta. Esses serviços podem operar fora do Brasil; nesses casos aplica-se a transferência internacional prevista na LGPD, com o cuidado de limitar o envio ao texto da conversa.</p>
 
   <h2>O Ôjas Bot e o sigilo profissional</h2>
