@@ -507,7 +507,7 @@ function desenharListaDoDia() {
           '<button type="button" class="btn-realizado" data-acao="realizado">Realizado</button>' +
           "</div>"
         : "");
-    item.querySelector('[data-acao="cancelar"]')?.addEventListener("click", () => atualizarStatus(agendamento.id, "cancelado"));
+    item.querySelector('[data-acao="cancelar"]')?.addEventListener("click", () => pedirCancelamento(agendamento.id));
     item.querySelector('[data-acao="realizado"]')?.addEventListener("click", () => marcarRealizadoNaTela(agendamento.id));
     listaAgendamentos.appendChild(item);
   });
@@ -532,12 +532,33 @@ function horariosSobrepostos(novoInicio, novoFim, ignorarId) {
   });
 }
 
-async function marcarRealizadoNaTela(id) {
-  let nota = "";
-  if (confirm("Deseja anotar alguma observação?")) {
-    const digitado = prompt("Observação:", "");
-    if (digitado && digitado.trim()) nota = digitado.trim();
-  }
+const modalRealizado = document.getElementById("modal-realizado");
+const modalPassoPergunta = document.getElementById("modal-realizado-passo-pergunta");
+const modalPassoTexto = document.getElementById("modal-realizado-passo-texto");
+const modalTexto = document.getElementById("modal-realizado-texto");
+let idPendenteRealizado = null;
+
+function fecharModalRealizado() {
+  if (!modalRealizado) return;
+  modalRealizado.hidden = true;
+  idPendenteRealizado = null;
+  if (modalTexto) modalTexto.value = "";
+  if (modalPassoPergunta) modalPassoPergunta.hidden = false;
+  if (modalPassoTexto) modalPassoTexto.hidden = true;
+}
+
+function abrirModalRealizado(id) {
+  idPendenteRealizado = id;
+  if (modalTexto) modalTexto.value = "";
+  if (modalPassoPergunta) modalPassoPergunta.hidden = false;
+  if (modalPassoTexto) modalPassoTexto.hidden = true;
+  if (modalRealizado) modalRealizado.hidden = false;
+}
+
+async function concluirRealizado(nota) {
+  const id = idPendenteRealizado;
+  fecharModalRealizado();
+  if (!id) return;
   if (nota) {
     salvarNotaRealizadoLocal(id, nota);
     const atual = agendamentosDoMes.find((a) => String(a.id) === String(id));
@@ -551,9 +572,49 @@ async function marcarRealizadoNaTela(id) {
   desenharListaDoDia();
 }
 
+function marcarRealizadoNaTela(id) {
+  abrirModalRealizado(id);
+}
+
+if (modalRealizado) {
+  document.getElementById("modal-realizado-sim")?.addEventListener("click", () => {
+    if (modalPassoPergunta) modalPassoPergunta.hidden = true;
+    if (modalPassoTexto) modalPassoTexto.hidden = false;
+    modalTexto?.focus();
+  });
+  document.getElementById("modal-realizado-nao")?.addEventListener("click", () => concluirRealizado(""));
+  document.getElementById("modal-realizado-salvar")?.addEventListener("click", () => {
+    concluirRealizado((modalTexto && modalTexto.value.trim()) || "");
+  });
+  document.getElementById("modal-realizado-pular")?.addEventListener("click", () => concluirRealizado(""));
+  modalRealizado.querySelector("[data-modal-fechar]")?.addEventListener("click", () => fecharModalRealizado());
+}
+
+const modalCancelar = document.getElementById("modal-cancelar");
+let idPendenteCancelar = null;
+
+function fecharModalCancelar() {
+  if (modalCancelar) modalCancelar.hidden = true;
+  idPendenteCancelar = null;
+}
+
+function pedirCancelamento(id) {
+  idPendenteCancelar = id;
+  if (modalCancelar) modalCancelar.hidden = false;
+}
+
+if (modalCancelar) {
+  document.getElementById("modal-cancelar-sim")?.addEventListener("click", () => {
+    const id = idPendenteCancelar;
+    fecharModalCancelar();
+    if (id) atualizarStatus(id, "cancelado");
+  });
+  document.getElementById("modal-cancelar-nao")?.addEventListener("click", fecharModalCancelar);
+  modalCancelar.querySelector("[data-modal-cancelar-fechar]")?.addEventListener("click", fecharModalCancelar);
+}
+
 async function atualizarStatus(id, novoStatus) {
   if (operacaoEmAndamento || !cliente) return;
-  if (novoStatus === "cancelado" && !confirm("Tem certeza que deseja cancelar?")) return;
   operacaoEmAndamento = true;
   const { error } = await cliente.from("agendamentos").update({ status: novoStatus }).eq("id", id);
   operacaoEmAndamento = false;
