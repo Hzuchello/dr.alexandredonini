@@ -182,9 +182,9 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1px solid var(--creme-escuro);
-  background: var(--creme);
-  color: var(--verde-escuro);
+  border: 1px solid #2A2C28;
+  background: #3D403C;
+  color: var(--creme);
   font-size: 1.2rem;
   cursor: pointer;
   display: flex;
@@ -193,9 +193,9 @@
 }
 
 .btn-icone:hover:not(:disabled) {
-  border-color: var(--creme);
-  background: var(--creme-claro);
-  color: var(--verde);
+  border-color: #1F211E;
+  background: #2F322F;
+  color: var(--creme-claro);
 }
 
 .calendario-semana {
@@ -227,9 +227,9 @@
 
 .dia {
   aspect-ratio: 1;
-  border: 2px solid var(--creme-escuro);
+  border: 2px solid #2A2C28;
   border-radius: 4px;
-  background: var(--creme);
+  background: #3D403C;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -238,13 +238,13 @@
   cursor: pointer;
   font-size: 1.28rem;
   font-weight: 600;
-  color: var(--verde-escuro);
+  color: var(--creme);
 }
 
 .dia:hover,
 .dia:focus-visible {
-  border-color: var(--creme);
-  background: var(--creme-claro);
+  border-color: #1F211E;
+  background: #2F322F;
 }
 
 .dia:focus-visible {
@@ -258,15 +258,15 @@
 }
 
 .dia.hoje {
-  border-color: var(--verde);
-  box-shadow: inset 0 0 0 2px var(--verde);
+  border-color: var(--creme);
+  box-shadow: inset 0 0 0 2px var(--creme);
   font-weight: 600;
 }
 
 .dia.selecionado {
-  background: var(--creme-claro);
-  border-color: var(--verde);
-  color: var(--verde-escuro);
+  background: #2F322F;
+  border-color: var(--creme);
+  color: var(--creme-claro);
 }
 
 .dia-badge {
