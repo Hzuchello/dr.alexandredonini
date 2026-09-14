@@ -69,6 +69,26 @@ let diaSelecionado = null;
 let operacaoEmAndamento = false;
 let timerAgenda = null;
 const INTERVALO_AGENDA_MS = 10000;
+const CHAVE_REALIZADOS = "ojas-admin-realizados";
+
+function idsRealizadosLocal() {
+  try {
+    const lista = JSON.parse(sessionStorage.getItem(CHAVE_REALIZADOS) || "[]");
+    return Array.isArray(lista) ? lista : [];
+  } catch (erro) {
+    return [];
+  }
+}
+
+function estaArquivadoLocal(id) {
+  return idsRealizadosLocal().includes(String(id));
+}
+
+function arquivarLocal(id) {
+  const set = new Set(idsRealizadosLocal());
+  set.add(String(id));
+  sessionStorage.setItem(CHAVE_REALIZADOS, JSON.stringify(Array.from(set)));
+}
 
 const NOMES_MES = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -434,9 +454,16 @@ function desenharListaDoDia() {
   listaAgendamentos.innerHTML = "";
   doDia.forEach((agendamento) => {
     const item = document.createElement("div");
-    item.className = "agendamento-item" + (agendamento.status === "cancelado" ? " cancelado" : "");
+    const cancelado = agendamento.status === "cancelado";
+    const realizadoLocal = !cancelado && estaArquivadoLocal(agendamento.id);
+    item.className =
+      "agendamento-item" +
+      (cancelado ? " cancelado" : "") +
+      (realizadoLocal ? " realizado" : "");
     const faixa = agendamento.faixa_etaria ? " · " + escaparHtml(agendamento.faixa_etaria) : "";
     const obs = agendamento.observacoes ? "<p>" + escaparHtml(agendamento.observacoes) + "</p>" : "";
+    const rotuloStatus = cancelado ? "cancelado" : realizadoLocal ? "realizado" : (agendamento.status || "");
+    const mostrarAcoes = !cancelado && !realizadoLocal;
     item.innerHTML =
       '<span class="horario">' +
       escaparHtml(normalizarHora(agendamento.hora_inicio)) +
@@ -444,7 +471,7 @@ function desenharListaDoDia() {
       escaparHtml(normalizarHora(agendamento.hora_fim)) +
       "</span>" +
       '<span class="status-tag">' +
-      escaparHtml(agendamento.status || "") +
+      escaparHtml(rotuloStatus) +
       "</span>" +
       "<p><strong>" +
       escaparHtml(agendamento.nome_paciente || "") +
@@ -456,12 +483,14 @@ function desenharListaDoDia() {
       faixa +
       "</p>" +
       obs +
-      '<div class="agendamento-acoes">' +
-      (agendamento.status !== "cancelado"
-        ? '<button type="button" class="btn-cancelar" data-acao="cancelar">Cancelar</button>'
-        : "") +
-      "</div>";
+      (mostrarAcoes
+        ? '<div class="agendamento-acoes">' +
+          '<button type="button" class="btn-cancelar" data-acao="cancelar">Cancelar</button>' +
+          '<button type="button" class="btn-realizado" data-acao="realizado">Realizado</button>' +
+          "</div>"
+        : "");
     item.querySelector('[data-acao="cancelar"]')?.addEventListener("click", () => atualizarStatus(agendamento.id, "cancelado"));
+    item.querySelector('[data-acao="realizado"]')?.addEventListener("click", () => marcarRealizadoNaTela(agendamento.id));
     listaAgendamentos.appendChild(item);
   });
 }
@@ -483,6 +512,11 @@ function horariosSobrepostos(novoInicio, novoFim, ignorarId) {
     const aFim = horaParaMinutos(a.hora_fim);
     return ini < aFim && fim > aIni;
   });
+}
+
+function marcarRealizadoNaTela(id) {
+  arquivarLocal(id);
+  desenharListaDoDia();
 }
 
 async function atualizarStatus(id, novoStatus) {
