@@ -295,7 +295,7 @@
   width: 100%;
   max-width: 420px;
   height: 100%;
-  background: var(--creme);
+  background: var(--verde-escuro);
   overflow-y: auto;
   padding: 26px 24px 40px;
 }
@@ -310,6 +310,7 @@
 .painel-dia-topo h3 {
   margin: 0;
   text-transform: capitalize;
+  color: var(--creme);
 }
 
 .lista-agendamentos {
@@ -448,7 +449,7 @@
 }
 
 .sem-agendamentos {
-  color: var(--verde-claro);
+  color: var(--creme);
   font-size: 0.9rem;
 }
 
@@ -520,7 +521,7 @@
 
 .novo-agendamento summary {
   cursor: pointer;
-  color: var(--verde);
+  color: var(--creme);
   font-weight: 500;
   font-size: 0.92rem;
   margin-bottom: 14px;
