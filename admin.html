@@ -151,6 +151,37 @@
 </div>
 </div>
 
+<div id="modal-cancelar" class="modal-site" hidden>
+  <div class="modal-site-fundo" data-modal-cancelar-fechar></div>
+  <div class="modal-site-caixa" role="dialog" aria-modal="true" aria-labelledby="modal-cancelar-titulo">
+    <p id="modal-cancelar-titulo">Tem certeza que deseja cancelar?</p>
+    <div class="modal-site-acoes">
+      <button type="button" class="btn-cancelar" id="modal-cancelar-sim">Sim</button>
+      <button type="button" class="btn-realizado" id="modal-cancelar-nao">Não</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-realizado" class="modal-site" hidden>
+  <div class="modal-site-fundo" data-modal-fechar></div>
+  <div class="modal-site-caixa" role="dialog" aria-modal="true" aria-labelledby="modal-realizado-titulo">
+    <p id="modal-realizado-titulo">Deseja anotar alguma observação?</p>
+    <div id="modal-realizado-passo-pergunta" class="modal-site-acoes">
+      <button type="button" class="btn-realizado" id="modal-realizado-sim">Sim</button>
+      <button type="button" class="btn-cancelar" id="modal-realizado-nao">Não</button>
+    </div>
+    <div id="modal-realizado-passo-texto" hidden>
+      <label for="modal-realizado-texto">Observação
+        <textarea id="modal-realizado-texto" rows="3" maxlength="280"></textarea>
+      </label>
+      <div class="modal-site-acoes">
+        <button type="button" class="btn-realizado" id="modal-realizado-salvar">Salvar</button>
+        <button type="button" class="btn-cancelar" id="modal-realizado-pular">Sem observação</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="admin.js"></script>
 <script>
