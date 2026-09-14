@@ -472,10 +472,12 @@ function desenharListaDoDia() {
     const item = document.createElement("div");
     const cancelado = agendamento.status === "cancelado";
     const realizadoLocal = !cancelado && estaArquivadoLocal(agendamento.id);
+    const arquivado = cancelado || realizadoLocal;
     item.className =
       "agendamento-item" +
       (cancelado ? " cancelado" : "") +
-      (realizadoLocal ? " realizado" : "");
+      (realizadoLocal ? " realizado" : "") +
+      (arquivado ? " resumido" : "");
     const faixa = agendamento.faixa_etaria ? " · " + escaparHtml(agendamento.faixa_etaria) : "";
     const notaLocal = notasRealizadoLocal()[String(agendamento.id)] || "";
     const textoObs = [agendamento.observacoes, notaLocal].filter(Boolean).join(" · ");
@@ -483,17 +485,29 @@ function desenharListaDoDia() {
     const rotuloStatus = cancelado ? "cancelado" : realizadoLocal ? "realizado" : (agendamento.status || "");
     const mostrarAcoes = !cancelado && !realizadoLocal;
     item.innerHTML =
+      '<div class="agendamento-resumo">' +
       '<span class="horario">' +
       escaparHtml(normalizarHora(agendamento.hora_inicio)) +
-      " – " +
-      escaparHtml(normalizarHora(agendamento.hora_fim)) +
+      (arquivado ? "" : " – " + escaparHtml(normalizarHora(agendamento.hora_fim))) +
+      "</span>" +
+      '<span class="nome-resumo">' +
+      escaparHtml(agendamento.nome_paciente || "") +
       "</span>" +
       '<span class="status-tag">' +
       escaparHtml(rotuloStatus) +
       "</span>" +
-      "<p><strong>" +
-      escaparHtml(agendamento.nome_paciente || "") +
-      "</strong></p>" +
+      "</div>" +
+      '<div class="agendamento-detalhe">' +
+      (arquivado
+        ? "<p><strong>" +
+          escaparHtml(agendamento.nome_paciente || "") +
+          "</strong></p>" +
+          '<span class="horario">' +
+          escaparHtml(normalizarHora(agendamento.hora_inicio)) +
+          " – " +
+          escaparHtml(normalizarHora(agendamento.hora_fim)) +
+          "</span>"
+        : "") +
       "<p>" +
       escaparHtml(formatarTelefone(agendamento.telefone)) +
       " · " +
@@ -510,9 +524,16 @@ function desenharListaDoDia() {
           '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7"/></svg>' +
           "</button>" +
           "</div>"
-        : "");
+        : "") +
+      "</div>";
     item.querySelector('[data-acao="cancelar"]')?.addEventListener("click", () => pedirCancelamento(agendamento.id));
     item.querySelector('[data-acao="realizado"]')?.addEventListener("click", () => marcarRealizadoNaTela(agendamento.id));
+    if (arquivado) {
+      item.addEventListener("click", () => {
+        item.classList.toggle("resumido");
+        item.classList.toggle("aberto");
+      });
+    }
     listaAgendamentos.appendChild(item);
   });
 }
