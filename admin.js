@@ -71,6 +71,7 @@ let timerAgenda = null;
 const INTERVALO_AGENDA_MS = 10000;
 const CHAVE_REALIZADOS = "ojas-admin-realizados";
 const CHAVE_OBS_LOCAL = "ojas-admin-obs-realizados";
+const cardsArquivadosAbertos = new Set();
 
 function idsRealizadosLocal() {
   try {
@@ -477,7 +478,7 @@ function desenharListaDoDia() {
       "agendamento-item" +
       (cancelado ? " cancelado" : "") +
       (realizadoLocal ? " realizado" : "") +
-      (arquivado ? " resumido" : "");
+      (arquivado ? (cardsArquivadosAbertos.has(String(agendamento.id)) ? " aberto" : " resumido") : "");
     const faixa = agendamento.faixa_etaria ? " · " + escaparHtml(agendamento.faixa_etaria) : "";
     const notaLocal = notasRealizadoLocal()[String(agendamento.id)] || "";
     const textoObs = [agendamento.observacoes, notaLocal].filter(Boolean).join(" · ");
@@ -530,8 +531,12 @@ function desenharListaDoDia() {
     item.querySelector('[data-acao="realizado"]')?.addEventListener("click", () => marcarRealizadoNaTela(agendamento.id));
     if (arquivado) {
       item.addEventListener("click", () => {
+        const chave = String(agendamento.id);
+        const vaiAbrir = item.classList.contains("resumido");
         item.classList.toggle("resumido");
         item.classList.toggle("aberto");
+        if (vaiAbrir) cardsArquivadosAbertos.add(chave);
+        else cardsArquivadosAbertos.delete(chave);
       });
     }
     listaAgendamentos.appendChild(item);
