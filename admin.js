@@ -12,7 +12,7 @@
 const ADMIN_CONFIG = {
   supabaseUrl: "https://fiplnxrqbcoxadzirawm.supabase.co",
   supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpcGxueHJxYmNveGFkemlyYXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTU0NDUsImV4cCI6MjEwNDgzMTQ0NX0.cu1Mb5nwAkA93mBu40W96SVKmnr7ndUSmefmHEgYpq4",
-  linkSessao: "",
+  linkSessao: "https://meet.google.com/tef-gpkg-vgi",
 };
 
 function configInvalida() {
