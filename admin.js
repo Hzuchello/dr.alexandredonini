@@ -12,6 +12,7 @@
 const ADMIN_CONFIG = {
   supabaseUrl: "https://fiplnxrqbcoxadzirawm.supabase.co",
   supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpcGxueHJxYmNveGFkemlyYXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyNTU0NDUsImV4cCI6MjEwNDgzMTQ0NX0.cu1Mb5nwAkA93mBu40W96SVKmnr7ndUSmefmHEgYpq4",
+  linkSessao: "",
 };
 
 function configInvalida() {
@@ -205,7 +206,7 @@ function mostrarView(logado) {
     agendamentosDoMes = [];
     return;
   }
-  carregarMes(false);
+  carregarMes(false).then(() => abrirPainelDia(hojeISO()));
   iniciarAtualizacaoAgenda();
 }
 
@@ -525,11 +526,20 @@ function desenharListaDoDia() {
           '<button type="button" class="btn-realizado" data-acao="realizado" title="Realizado" aria-label="Realizado">' +
           '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7"/></svg>' +
           "</button>" +
+          (String(agendamento.modalidade || "").toLowerCase() === "online"
+            ? '<button type="button" class="btn-link-sessao" data-acao="link" title="Enviar link da sessão" aria-label="Enviar link da sessão">' +
+              '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l1.41-1.41a5 5 0 0 0-7.07-7.07L10 5.93M14 11a5 5 0 0 0-7.07 0L5.52 12.4a5 5 0 0 0 7.07 7.07L14 18.07"/></svg>' +
+              "</button>"
+            : "") +
           "</div>"
         : "") +
       "</div>";
     item.querySelector('[data-acao="cancelar"]')?.addEventListener("click", () => pedirCancelamento(agendamento.id));
     item.querySelector('[data-acao="realizado"]')?.addEventListener("click", () => marcarRealizadoNaTela(agendamento.id));
+    item.querySelector('[data-acao="link"]')?.addEventListener("click", (evento) => {
+      evento.stopPropagation();
+      enviarLinkSessao(agendamento);
+    });
     if (arquivado) {
       item.addEventListener("click", () => {
         const chave = String(agendamento.id);
@@ -608,6 +618,29 @@ async function concluirRealizado(nota) {
 
 function marcarRealizadoNaTela(id) {
   abrirModalRealizado(id);
+}
+
+function enviarLinkSessao(agendamento) {
+  const link = (ADMIN_CONFIG.linkSessao || "").trim();
+  if (!link || link.startsWith("COLE_")) {
+    alert("Cole o link da sessão (Meet, Zoom etc.) em ADMIN_CONFIG.linkSessao no admin.js.");
+    return;
+  }
+  const digitos = sanitizarTelefone(agendamento.telefone);
+  if (digitos.length < 10) {
+    alert("Este agendamento não tem WhatsApp válido para envio.");
+    return;
+  }
+  const e164 = digitos.length === 11 || digitos.length === 10 ? "55" + digitos : digitos;
+  const hora = normalizarHora(agendamento.hora_inicio);
+  const texto =
+    "Olá, " +
+    (agendamento.nome_paciente || "") +
+    ". Segue o link da sessão de hoje às " +
+    hora +
+    ": " +
+    link;
+  window.open("https://wa.me/" + e164 + "?text=" + encodeURIComponent(texto), "_blank", "noopener");
 }
 
 if (modalRealizado) {
