@@ -153,8 +153,7 @@ const OJAS_CONFIG = {
     } catch (erro) {
       bolhaDigitando.remove();
       falarBot(
-        "Não consegui falar com o servidor agora. Você pode continuar direto pelo WhatsApp: " +
-        "https://wa.me/" + OJAS_CONFIG.whatsappNumero
+        "Ôjas Bot está offline."
       );
       console.error("Ôjas Bot — falha ao chamar o webhook:", erro);
     } finally {
