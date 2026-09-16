@@ -457,7 +457,8 @@
 }
 
 .agendamento-acoes .btn-cancelar svg,
-.agendamento-acoes .btn-realizado svg {
+.agendamento-acoes .btn-realizado svg,
+.agendamento-acoes .btn-link-sessao svg {
   width: 18px;
   height: 18px;
   fill: none;
@@ -465,6 +466,17 @@
   stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.btn-link-sessao {
+  background: var(--creme);
+  border: 1px solid var(--verde-escuro);
+  color: var(--verde-escuro);
+}
+
+.btn-link-sessao:hover {
+  background: var(--creme-claro);
+  color: var(--verde);
 }
 
 .btn-cancelar {
